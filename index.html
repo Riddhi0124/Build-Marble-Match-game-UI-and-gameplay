@@ -442,7 +442,7 @@
               <div class="stat"><strong>Hidden marbles</strong><span id="resultHidden"></span></div>
               <div class="stat"><strong>Guess</strong><span id="resultGuess"></span></div>
               <div class="stat"><strong>Outcome</strong><span id="resultOutcome"></span></div>
-              <div class="stat"><strong>Transferred</strong><span id="resultTransfer"></span></div>
+              <div class="stat"><strong>Marble move</strong><span id="resultTransfer"></span></div>
               <div class="stat"><strong>Player 1 total</strong><span id="resultPlayer1"></span></div>
               <div class="stat"><strong>Player 2 total</strong><span id="resultPlayer2"></span></div>
             </div>
@@ -560,6 +560,32 @@
       };
     }
 
+    function resolveMarbleTransfer(holder, guesser, hiddenMarbles, guessedParity) {
+      const actualParity = getParityName(hiddenMarbles);
+      const guessCorrect = guessedParity === actualParity;
+      const payer = guessCorrect ? holder : guesser;
+      const receiver = guessCorrect ? guesser : holder;
+
+      if (payer.marbles < hiddenMarbles) {
+        return {
+          ok: false,
+          message: `Illegal transfer: Player ${payer.id} does not have enough marbles.`
+        };
+      }
+
+      return {
+        ok: true,
+        actualParity,
+        guessCorrect,
+        transferred: hiddenMarbles,
+        giverId: payer.id,
+        receiverId: receiver.id,
+        summaryText: guessCorrect
+          ? `Player ${guesser.id} guessed correctly, so Player ${holder.id} gives ${hiddenMarbles} marbles to Player ${guesser.id}.`
+          : `Player ${guesser.id} guessed wrong, so Player ${guesser.id} gives ${hiddenMarbles} marbles to Player ${holder.id}.`
+      };
+    }
+
     function playRound(state, guess) {
       if (state.winnerId !== null) {
         return { ok: false, message: "The game is already over. Restart to play again." };
@@ -576,15 +602,10 @@
       const holder = getHolder(state);
       const guesser = getGuesser(state);
       const hiddenMarbles = state.hiddenMarbles;
-      const actualParity = getParityName(hiddenMarbles);
-      const guessCorrect = guess === actualParity;
+      const transfer = resolveMarbleTransfer(holder, guesser, hiddenMarbles, guess);
 
-      if (guessCorrect && holder.marbles < hiddenMarbles) {
-        return { ok: false, message: `Illegal transfer: Player ${holder.id} does not have enough marbles.` };
-      }
-
-      if (!guessCorrect && guesser.marbles < hiddenMarbles) {
-        return { ok: false, message: `Illegal transfer: Player ${guesser.id} does not have enough marbles.` };
+      if (!transfer.ok) {
+        return transfer;
       }
 
       const updatedPlayers = state.players.map((player) => ({ ...player }));
@@ -592,7 +613,7 @@
       const guesserIndex = (state.holderIndex + 1) % state.players.length;
       const guesserPlayer = updatedPlayers[guesserIndex];
 
-      if (guessCorrect) {
+      if (transfer.guessCorrect) {
         holderPlayer.marbles -= hiddenMarbles;
         guesserPlayer.marbles += hiddenMarbles;
       } else {
@@ -607,10 +628,12 @@
         guesserId: guesser.id,
         hiddenMarbles,
         guess,
-        guessCorrect,
-        transferred: hiddenMarbles,
-        giverId: guessCorrect ? holder.id : guesser.id,
-        receiverId: guessCorrect ? guesser.id : holder.id,
+        actualParity: transfer.actualParity,
+        guessCorrect: transfer.guessCorrect,
+        transferred: transfer.transferred,
+        giverId: transfer.giverId,
+        receiverId: transfer.receiverId,
+        summaryText: transfer.summaryText,
         marbleCounts: updatedPlayers.map((player) => ({
           id: player.id,
           marbles: player.marbles
@@ -709,11 +732,11 @@
       elements.roundResult.classList.toggle("loss", !result.guessCorrect);
       elements.resultHidden.textContent = `${result.hiddenMarbles}`;
       elements.resultGuess.textContent = result.guess;
-      elements.resultOutcome.textContent = result.guessCorrect ? "Correct" : "Wrong";
-      elements.resultTransfer.textContent = `${result.transferred} marbles`;
+      elements.resultOutcome.textContent = result.guessCorrect ? "Correct guess" : "Wrong guess";
+      elements.resultTransfer.textContent = `Player ${result.giverId} -> Player ${result.receiverId} (${result.transferred})`;
       elements.resultPlayer1.textContent = `${player1.marbles}`;
       elements.resultPlayer2.textContent = `${player2.marbles}`;
-      elements.resultSummary.textContent = `Player ${result.giverId} transferred ${result.transferred} marbles to Player ${result.receiverId}.`;
+      elements.resultSummary.textContent = result.summaryText;
     }
 
     function renderHistory(state) {
@@ -735,7 +758,7 @@
               </header>
               <p>Hidden marbles: <strong>${entry.hiddenMarbles}</strong> • Guess: <strong>${entry.guess}</strong></p>
               <p class="history-outcome ${entry.guessCorrect ? "" : "loss"}">
-                Guess ${entry.guessCorrect ? "correct" : "wrong"} • ${entry.transferred} marbles transferred
+                ${entry.guessCorrect ? "Guess correct" : "Guess wrong"} • Player ${entry.giverId} paid ${entry.transferred} marbles to Player ${entry.receiverId}
               </p>
               <p>Counts after round: Player 1 = ${player1.marbles}, Player 2 = ${player2.marbles}</p>
             </article>
