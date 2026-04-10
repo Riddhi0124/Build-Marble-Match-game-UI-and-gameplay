@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Marble Match</title>
+  <style>
+    :root {
+      --bg: #f5f2eb;
+      --panel: #fffaf3;
+      --panel-soft: #fffdf8;
+      --text: #2a221c;
+      --muted: #6e6054;
+      --line: rgba(42, 34, 28, 0.12);
+      --accent: #d15734;
+      --accent-dark: #a63f23;
+      --accent-soft: rgba(209, 87, 52, 0.12);
+      --win: #2f8c59;
+      --lose: #b2472d;
+      --shadow: 0 16px 40px rgba(88, 55, 34, 0.1);
+      --radius: 24px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 24px;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(209, 87, 52, 0.14), transparent 28%),
+        linear-gradient(180deg, #faf6ef 0%, #f0e7d9 100%);
+    }
+
+    .app {
+      width: min(1100px, 100%);
+      margin: 0 auto;
+      display: grid;
+      gap: 20px;
+    }
+
+    .hero,
+    .panel {
+      background: rgba(255, 250, 243, 0.92);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      padding: 28px;
+    }
+
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: clamp(2.2rem, 4vw, 3.6rem);
+      line-height: 0.96;
+      letter-spacing: -0.04em;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 64ch;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .hero-meta {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .pill {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--panel-soft);
+      font-weight: 700;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1.2fr 0.9fr;
+      gap: 20px;
+    }
+
+    .panel {
+      padding: 24px;
+    }
+
+    .scoreboard {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .player-card {
+      padding: 20px;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: var(--panel-soft);
+      display: grid;
+      gap: 12px;
+    }
+
+    .player-card.active {
+      border-color: rgba(209, 87, 52, 0.35);
+      box-shadow: 0 12px 28px rgba(209, 87, 52, 0.12);
+    }
+
+    .player-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .player-head h2 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .role-tag {
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent-dark);
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .count {
+      font-size: clamp(2.3rem, 4vw, 3.3rem);
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -0.05em;
+    }
+
+    .marble-track {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 8px;
+    }
+
+    .marble {
+      aspect-ratio: 1;
+      border-radius: 50%;
+      opacity: 0.14;
+      background: linear-gradient(145deg, #ffd6b4 0%, #d15734 100%);
+      box-shadow: inset -3px -3px 8px rgba(0, 0, 0, 0.14), inset 3px 3px 8px rgba(255, 255, 255, 0.34);
+    }
+
+    .marble.filled {
+      opacity: 1;
+    }
+
+    .controls {
+      display: grid;
+      gap: 16px;
+    }
+
+    .section-card,
+    .result-card,
+    .game-over-card {
+      padding: 18px;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: var(--panel-soft);
+      display: grid;
+      gap: 10px;
+    }
+
+    .section-card h3,
+    .result-card h3,
+    .history-panel h3,
+    .game-over-card h3 {
+      margin: 0;
+      font-size: 0.95rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .section-card p,
+    .result-card p,
+    .history-item p,
+    .game-over-card p,
+    .supporting-copy {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .control-label {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .control-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    input[type="number"] {
+      width: 150px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(42, 34, 28, 0.18);
+      background: #fff;
+      font: inherit;
+      color: var(--text);
+    }
+
+    .guess-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 18px;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .primary-button {
+      background: var(--accent);
+      color: #fffaf3;
+    }
+
+    .secondary-button {
+      background: rgba(42, 34, 28, 0.08);
+      color: var(--text);
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .error {
+      min-height: 1.4em;
+      color: var(--lose);
+      font-weight: 800;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      font-size: 0.95rem;
+    }
+
+    .stat {
+      padding: 12px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.54);
+    }
+
+    .stat strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+
+    .result-card.success {
+      border-color: rgba(47, 140, 89, 0.24);
+      background: rgba(47, 140, 89, 0.08);
+    }
+
+    .result-card.loss {
+      border-color: rgba(178, 71, 45, 0.2);
+      background: rgba(178, 71, 45, 0.08);
+    }
+
+    .history-panel {
+      display: grid;
+      gap: 16px;
+      height: 100%;
+    }
+
+    .history-list {
+      display: grid;
+      gap: 12px;
+      max-height: 760px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .history-item {
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: var(--panel-soft);
+      display: grid;
+      gap: 8px;
+    }
+
+    .history-item header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .history-item span {
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .history-outcome {
+      font-weight: 800;
+      color: var(--win);
+    }
+
+    .history-outcome.loss {
+      color: var(--lose);
+    }
+
+    .winner-title {
+      margin: 0;
+      font-size: 1.8rem;
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .scoreboard {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 14px;
+      }
+
+      .hero,
+      .panel {
+        padding: 18px;
+      }
+
+      .control-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      input[type="number"] {
+        width: 100%;
+      }
+
+      .result-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="hero">
+      <h1>Marble Match</h1>
+      <p>
+        A 2-player marble game inspired by the odd-or-even showdown. One player hides marbles, the other guesses,
+        and all 20 marbles stay in play until one player claims every last one.
+      </p>
+      <div class="hero-meta">
+        <div class="pill-row">
+          <div class="pill" id="turnBadge">Current turn: Player 1 is holding</div>
+          <div class="pill" id="roundBadge">Round 1</div>
+        </div>
+        <button class="secondary-button" id="restartButton" type="button">Restart Game</button>
+      </div>
+    </section>
+
+    <div class="layout">
+      <section class="panel">
+        <div class="scoreboard" id="scoreboard"></div>
+
+        <div class="controls">
+          <section class="section-card">
+            <h3>Turn Status</h3>
+            <p id="statusText"></p>
+          </section>
+
+          <section class="section-card">
+            <h3>Holder Move</h3>
+            <div class="control-label" id="holderLabel">Holder chooses how many marbles to hide</div>
+            <div class="control-row">
+              <input id="hiddenMarblesInput" type="number" min="1" step="1" inputmode="numeric" />
+              <button class="primary-button" id="lockChoiceButton" type="button">Lock Hidden Marbles</button>
+            </div>
+            <p id="holderHelp" class="supporting-copy"></p>
+          </section>
+
+          <section class="section-card">
+            <h3>Guesser Move</h3>
+            <div class="control-label">Pick Odd or Even</div>
+            <div class="guess-buttons">
+              <button class="primary-button" id="guessOddButton" type="button">Odd</button>
+              <button class="primary-button" id="guessEvenButton" type="button">Even</button>
+            </div>
+            <p id="guesserHelp" class="supporting-copy"></p>
+          </section>
+
+          <p id="errorText" class="error" aria-live="polite"></p>
+
+          <section id="roundResult" class="result-card" hidden>
+            <h3>Last Round</h3>
+            <div class="result-grid">
+              <div class="stat"><strong>Hidden marbles</strong><span id="resultHidden"></span></div>
+              <div class="stat"><strong>Guess</strong><span id="resultGuess"></span></div>
+              <div class="stat"><strong>Outcome</strong><span id="resultOutcome"></span></div>
+              <div class="stat"><strong>Transferred</strong><span id="resultTransfer"></span></div>
+              <div class="stat"><strong>Player 1 total</strong><span id="resultPlayer1"></span></div>
+              <div class="stat"><strong>Player 2 total</strong><span id="resultPlayer2"></span></div>
+            </div>
+            <p id="resultSummary"></p>
+          </section>
+
+          <section id="gameOverCard" class="game-over-card" hidden>
+            <h3>Game Over</h3>
+            <h2 class="winner-title" id="gameOverTitle"></h2>
+            <p id="gameOverText"></p>
+          </section>
+        </div>
+      </section>
+
+      <aside class="panel history-panel">
+        <h3>Game Log</h3>
+        <div id="historyList" class="history-list" aria-live="polite">
+          <p class="supporting-copy">No rounds played yet. The first result will appear here.</p>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const TOTAL_MARBLES = 20;
+    const STARTING_MARBLES = TOTAL_MARBLES / 2;
+    const GUESSES = {
+      ODD: "Odd",
+      EVEN: "Even"
+    };
+
+    function createInitialState() {
+      return {
+        round: 1,
+        players: [
+          { id: 1, marbles: STARTING_MARBLES },
+          { id: 2, marbles: STARTING_MARBLES }
+        ],
+        holderIndex: 0,
+        hiddenMarbles: null,
+        lastResult: null,
+        history: [],
+        winnerId: null
+      };
+    }
+
+    function getHolder(state) {
+      return state.players[state.holderIndex];
+    }
+
+    function getGuesser(state) {
+      return state.players[(state.holderIndex + 1) % state.players.length];
+    }
+
+    function isOdd(value) {
+      return value % 2 !== 0;
+    }
+
+    function getParityName(value) {
+      return isOdd(value) ? GUESSES.ODD : GUESSES.EVEN;
+    }
+
+    function getMaximumLegalWager(state) {
+      const holder = getHolder(state);
+      const guesser = getGuesser(state);
+      return Math.min(holder.marbles, guesser.marbles);
+    }
+
+    function validateHiddenMarbles(state, rawValue) {
+      const holder = getHolder(state);
+      const guesser = getGuesser(state);
+      const maximumLegalWager = getMaximumLegalWager(state);
+      const parsedValue = Number.parseInt(rawValue, 10);
+
+      if (!Number.isInteger(parsedValue)) {
+        return { ok: false, message: "Enter a whole number of marbles." };
+      }
+
+      if (parsedValue < 1) {
+        return { ok: false, message: "The holder must hide at least 1 marble." };
+      }
+
+      if (parsedValue > holder.marbles) {
+        return {
+          ok: false,
+          message: `Illegal move: Player ${holder.id} only has ${holder.marbles} marbles.`
+        };
+      }
+
+      if (parsedValue > maximumLegalWager) {
+        return {
+          ok: false,
+          message:
+            `Illegal move: Player ${guesser.id} could not cover ${parsedValue} marbles if the guess is wrong. ` +
+            `Choose ${maximumLegalWager} or fewer.`
+        };
+      }
+
+      return { ok: true, value: parsedValue };
+    }
+
+    function setHiddenMarbles(state, rawValue) {
+      const validation = validateHiddenMarbles(state, rawValue);
+
+      if (!validation.ok) {
+        return validation;
+      }
+
+      return {
+        ok: true,
+        state: {
+          ...state,
+          hiddenMarbles: validation.value
+        }
+      };
+    }
+
+    function playRound(state, guess) {
+      if (state.winnerId !== null) {
+        return { ok: false, message: "The game is already over. Restart to play again." };
+      }
+
+      if (state.hiddenMarbles === null) {
+        return { ok: false, message: "The holder must lock in hidden marbles first." };
+      }
+
+      if (guess !== GUESSES.ODD && guess !== GUESSES.EVEN) {
+        return { ok: false, message: "The guess must be Odd or Even." };
+      }
+
+      const holder = getHolder(state);
+      const guesser = getGuesser(state);
+      const hiddenMarbles = state.hiddenMarbles;
+      const actualParity = getParityName(hiddenMarbles);
+      const guessCorrect = guess === actualParity;
+
+      if (guessCorrect && holder.marbles < hiddenMarbles) {
+        return { ok: false, message: `Illegal transfer: Player ${holder.id} does not have enough marbles.` };
+      }
+
+      if (!guessCorrect && guesser.marbles < hiddenMarbles) {
+        return { ok: false, message: `Illegal transfer: Player ${guesser.id} does not have enough marbles.` };
+      }
+
+      const updatedPlayers = state.players.map((player) => ({ ...player }));
+      const holderPlayer = updatedPlayers[state.holderIndex];
+      const guesserIndex = (state.holderIndex + 1) % state.players.length;
+      const guesserPlayer = updatedPlayers[guesserIndex];
+
+      if (guessCorrect) {
+        holderPlayer.marbles -= hiddenMarbles;
+        guesserPlayer.marbles += hiddenMarbles;
+      } else {
+        guesserPlayer.marbles -= hiddenMarbles;
+        holderPlayer.marbles += hiddenMarbles;
+      }
+
+      const winner = updatedPlayers.find((player) => player.marbles === TOTAL_MARBLES) || null;
+      const result = {
+        round: state.round,
+        holderId: holder.id,
+        guesserId: guesser.id,
+        hiddenMarbles,
+        guess,
+        guessCorrect,
+        transferred: hiddenMarbles,
+        giverId: guessCorrect ? holder.id : guesser.id,
+        receiverId: guessCorrect ? guesser.id : holder.id,
+        marbleCounts: updatedPlayers.map((player) => ({
+          id: player.id,
+          marbles: player.marbles
+        }))
+      };
+
+      return {
+        ok: true,
+        state: {
+          ...state,
+          round: state.round + 1,
+          players: updatedPlayers,
+          holderIndex: guesserIndex,
+          hiddenMarbles: null,
+          lastResult: result,
+          history: [result, ...state.history],
+          winnerId: winner ? winner.id : null
+        }
+      };
+    }
+
+    const elements = {
+      scoreboard: document.getElementById("scoreboard"),
+      turnBadge: document.getElementById("turnBadge"),
+      roundBadge: document.getElementById("roundBadge"),
+      statusText: document.getElementById("statusText"),
+      hiddenMarblesInput: document.getElementById("hiddenMarblesInput"),
+      lockChoiceButton: document.getElementById("lockChoiceButton"),
+      holderLabel: document.getElementById("holderLabel"),
+      holderHelp: document.getElementById("holderHelp"),
+      guesserHelp: document.getElementById("guesserHelp"),
+      guessOddButton: document.getElementById("guessOddButton"),
+      guessEvenButton: document.getElementById("guessEvenButton"),
+      errorText: document.getElementById("errorText"),
+      roundResult: document.getElementById("roundResult"),
+      resultHidden: document.getElementById("resultHidden"),
+      resultGuess: document.getElementById("resultGuess"),
+      resultOutcome: document.getElementById("resultOutcome"),
+      resultTransfer: document.getElementById("resultTransfer"),
+      resultPlayer1: document.getElementById("resultPlayer1"),
+      resultPlayer2: document.getElementById("resultPlayer2"),
+      resultSummary: document.getElementById("resultSummary"),
+      gameOverCard: document.getElementById("gameOverCard"),
+      gameOverTitle: document.getElementById("gameOverTitle"),
+      gameOverText: document.getElementById("gameOverText"),
+      historyList: document.getElementById("historyList"),
+      restartButton: document.getElementById("restartButton")
+    };
+
+    let gameState = createInitialState();
+
+    function setError(message) {
+      elements.errorText.textContent = message || "";
+    }
+
+    function renderScoreboard(state) {
+      const holder = getHolder(state);
+
+      elements.scoreboard.innerHTML = state.players
+        .map((player) => {
+          const marbles = Array.from({ length: TOTAL_MARBLES }, (_, index) => {
+            const marbleClass = index < player.marbles ? "marble filled" : "marble";
+            return `<span class="${marbleClass}" aria-hidden="true"></span>`;
+          }).join("");
+          const role = state.winnerId !== null
+            ? (player.id === state.winnerId ? "Winner" : "Opponent")
+            : (player.id === holder.id ? "Holder" : "Guesser");
+
+          return `
+            <article class="player-card ${player.id === holder.id && state.winnerId === null ? "active" : ""}">
+              <div class="player-head">
+                <h2>Player ${player.id}</h2>
+                <span class="role-tag">${role}</span>
+              </div>
+              <div class="count">${player.marbles}</div>
+              <div class="marble-track">${marbles}</div>
+            </article>
+          `;
+        })
+        .join("");
+    }
+
+    function renderLastResult(state) {
+      const result = state.lastResult;
+
+      if (!result) {
+        elements.roundResult.hidden = true;
+        return;
+      }
+
+      const player1 = result.marbleCounts.find((player) => player.id === 1);
+      const player2 = result.marbleCounts.find((player) => player.id === 2);
+
+      elements.roundResult.hidden = false;
+      elements.roundResult.classList.toggle("success", result.guessCorrect);
+      elements.roundResult.classList.toggle("loss", !result.guessCorrect);
+      elements.resultHidden.textContent = `${result.hiddenMarbles}`;
+      elements.resultGuess.textContent = result.guess;
+      elements.resultOutcome.textContent = result.guessCorrect ? "Correct" : "Wrong";
+      elements.resultTransfer.textContent = `${result.transferred} marbles`;
+      elements.resultPlayer1.textContent = `${player1.marbles}`;
+      elements.resultPlayer2.textContent = `${player2.marbles}`;
+      elements.resultSummary.textContent = `Player ${result.giverId} transferred ${result.transferred} marbles to Player ${result.receiverId}.`;
+    }
+
+    function renderHistory(state) {
+      if (state.history.length === 0) {
+        elements.historyList.innerHTML = '<p class="supporting-copy">No rounds played yet. The first result will appear here.</p>';
+        return;
+      }
+
+      elements.historyList.innerHTML = state.history
+        .map((entry) => {
+          const player1 = entry.marbleCounts.find((player) => player.id === 1);
+          const player2 = entry.marbleCounts.find((player) => player.id === 2);
+
+          return `
+            <article class="history-item">
+              <header>
+                <strong>Round ${entry.round}</strong>
+                <span>Holder: Player ${entry.holderId} • Guesser: Player ${entry.guesserId}</span>
+              </header>
+              <p>Hidden marbles: <strong>${entry.hiddenMarbles}</strong> • Guess: <strong>${entry.guess}</strong></p>
+              <p class="history-outcome ${entry.guessCorrect ? "" : "loss"}">
+                Guess ${entry.guessCorrect ? "correct" : "wrong"} • ${entry.transferred} marbles transferred
+              </p>
+              <p>Counts after round: Player 1 = ${player1.marbles}, Player 2 = ${player2.marbles}</p>
+            </article>
+          `;
+        })
+        .join("");
+    }
+
+    function renderControls(state) {
+      const holder = getHolder(state);
+      const guesser = getGuesser(state);
+      const maximumLegalWager = getMaximumLegalWager(state);
+      const gameOver = state.winnerId !== null;
+      const hiddenLocked = state.hiddenMarbles !== null;
+
+      elements.turnBadge.textContent = gameOver
+        ? `Player ${state.winnerId} wins`
+        : `Current turn: Player ${holder.id} is holding`;
+      elements.roundBadge.textContent = `Round ${state.round}`;
+      elements.statusText.textContent = gameOver
+        ? `Player ${state.winnerId} collected all ${TOTAL_MARBLES} marbles.`
+        : hiddenLocked
+          ? `Player ${holder.id} locked in the hidden marbles. Player ${guesser.id}, guess Odd or Even.`
+          : `Player ${holder.id} must choose a number between 1 and ${maximumLegalWager}.`;
+
+      elements.holderLabel.textContent = `Player ${holder.id} chooses how many marbles to hide`;
+      elements.holderHelp.textContent = gameOver
+        ? "The match is complete."
+        : `Valid range: 1 to ${maximumLegalWager}. Player ${holder.id} has ${holder.marbles}, Player ${guesser.id} has ${guesser.marbles}.`;
+      elements.guesserHelp.textContent = gameOver
+        ? "Restart to begin a new game."
+        : hiddenLocked
+          ? `Player ${guesser.id} can now make the guess.`
+          : `Waiting for Player ${holder.id} to lock in the hidden marbles.`;
+
+      elements.hiddenMarblesInput.min = "1";
+      elements.hiddenMarblesInput.max = String(maximumLegalWager);
+      elements.hiddenMarblesInput.disabled = gameOver || hiddenLocked;
+      elements.hiddenMarblesInput.value = hiddenLocked ? String(state.hiddenMarbles) : "";
+      elements.lockChoiceButton.disabled = gameOver || hiddenLocked;
+      elements.guessOddButton.disabled = gameOver || !hiddenLocked;
+      elements.guessEvenButton.disabled = gameOver || !hiddenLocked;
+
+      elements.gameOverCard.hidden = !gameOver;
+      if (gameOver) {
+        const loser = state.players.find((player) => player.id !== state.winnerId);
+        elements.gameOverTitle.textContent = `Player ${state.winnerId} takes all 20 marbles`;
+        elements.gameOverText.textContent = `Player ${loser.id} is out with 0 marbles.`;
+      }
+    }
+
+    function render() {
+      renderScoreboard(gameState);
+      renderControls(gameState);
+      renderLastResult(gameState);
+      renderHistory(gameState);
+    }
+
+    function handleLockChoice() {
+      const result = setHiddenMarbles(gameState, elements.hiddenMarblesInput.value.trim());
+
+      if (!result.ok) {
+        setError(result.message);
+        return;
+      }
+
+      gameState = result.state;
+      setError("");
+      render();
+    }
+
+    function handleGuess(guess) {
+      const result = playRound(gameState, guess);
+
+      if (!result.ok) {
+        setError(result.message);
+        return;
+      }
+
+      gameState = result.state;
+      setError("");
+      render();
+    }
+
+    function restartGame() {
+      gameState = createInitialState();
+      setError("");
+      render();
+      elements.hiddenMarblesInput.focus();
+    }
+
+    elements.lockChoiceButton.addEventListener("click", handleLockChoice);
+    elements.guessOddButton.addEventListener("click", () => handleGuess(GUESSES.ODD));
+    elements.guessEvenButton.addEventListener("click", () => handleGuess(GUESSES.EVEN));
+    elements.restartButton.addEventListener("click", restartGame);
+    elements.hiddenMarblesInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        handleLockChoice();
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>
