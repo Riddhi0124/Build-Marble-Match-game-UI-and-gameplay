@@ -1,76 +1,75 @@
-# Marble Match
+# Marble Match 🎯
 
-A polished 2-player marble game inspired by the odd-or-even showdown from *Squid Game*.
+A polished, interactive 2-player marble game inspired by the odd-or-even showdown from Squid Game, featuring modern UI, smooth animations, and real-time gameplay feedback.
 
-Players take turns hiding marbles and guessing parity. One correct read can swing the match, and the game ends only when one player owns all 20 marbles.
+Test your intuition, outplay your opponent, and claim all 20 marbles.
 
-## Live Concept
+## 🚀 Live Demo
 
-- Modern single-file build with HTML, CSS, and JavaScript
-- Responsive layout for desktop and laptop screens
-- Animated marble transfers, score feedback, and win celebration
-- Dark mode toggle
-- Round history with clear payer/receiver summaries
+Add link here if you deploy.
 
-## Gameplay Rules
+This is very important.
+
+## ✨ Features
+
+- Interactive 2-player gameplay with real-time updates
+- Smooth animations for marble transfers and score changes
+- Visual feedback for correct and incorrect guesses
+- Clean, responsive UI with modern design
+- Dark mode toggle 🌙
+- Round history with clear summaries
+- Input validation and edge-case handling
+- Winner screen with celebration effects 🎉
+
+## 🎮 Gameplay Rules
 
 Each game starts with:
 
 - Player 1: 10 marbles
 - Player 2: 10 marbles
-- Total marbles in play: 20
 
-Every round:
+Each round:
 
-1. One player is the **holder** and secretly chooses how many marbles to hide.
-2. The other player is the **guesser** and guesses whether that number is **Odd** or **Even**.
-3. If the guess is correct:
-   the **holder** gives that many marbles to the **guesser**.
-4. If the guess is wrong:
-   the **guesser** gives that many marbles to the **holder**.
-5. Roles switch for the next round.
+1. The holder secretly selects a number of marbles.
+2. The guesser chooses Odd or Even.
+3. If correct, the holder gives the hidden marbles.
+4. If wrong, the guesser gives the hidden marbles.
+5. Roles switch.
 
-The winner is the player who ends up with all 20 marbles.
+🏆 The player who collects all 20 marbles wins.
 
-## Features
+## 🛠 Tech Stack
 
-- Clean separation between game logic and UI rendering
-- Input validation for illegal hidden-marble amounts
-- Prevents transfers a player cannot afford
-- Round counter
-- Restart flow
-- Styled game log/history
-- Winner screen with confetti
-- Micro-interactions, hover states, and processing feedback
+- HTML
+- CSS for animations and responsive design
+- JavaScript for state management and game logic
 
-## Run Locally
-
-If you already have Python installed:
+## ⚙️ Run Locally
 
 ```bash
 python3 -m http.server 4173
 ```
 
-Then open:
+Open:
 
 ```text
 http://localhost:4173
 ```
 
-## Project Structure
+## 🧠 What I Focused On
 
-This project is intentionally lightweight:
+- Clean separation of game logic and UI
+- Robust input validation and edge-case handling
+- Smooth, intuitive user interactions
+- Writing maintainable and readable code
 
-- `index.html` — the full app, including layout, styles, animations, state, and game logic
-- `README.md` — project overview and setup notes
+## 📁 Project Structure
 
-## Tech Stack
+- `index.html` — full application (UI + logic)
+- `README.md` — documentation
 
-- HTML
-- CSS
-- Vanilla JavaScript
+## 🔍 Notes
 
-## Notes
-
-- The marble transfer logic is symmetric and depends only on the current **holder**, **guesser**, hidden amount, and guess result.
-- The UI is built in a single file to keep the project easy to run and review.
+- Game logic is fully symmetric and role-based (holder vs guesser)
+- Prevents invalid moves and negative marble states
+- Designed to be lightweight and easy to run
