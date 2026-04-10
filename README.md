@@ -6,9 +6,7 @@ Test your intuition, outplay your opponent, and claim all 20 marbles.
 
 ## 🚀 Live Demo
 
-Add link here if you deploy.
-
-This is very important.
+[Play Marble Match Live](https://riddhi0124.github.io/Build-Marble-Match-game-UI-and-gameplay/)
 
 ## ✨ Features
 
