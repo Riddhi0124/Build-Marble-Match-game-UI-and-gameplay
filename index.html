@@ -6,19 +6,61 @@
   <title>Marble Match</title>
   <style>
     :root {
-      --bg: #f5f2eb;
-      --panel: #fffaf3;
-      --panel-soft: #fffdf8;
-      --text: #2a221c;
-      --muted: #6e6054;
-      --line: rgba(42, 34, 28, 0.12);
-      --accent: #d15734;
-      --accent-dark: #a63f23;
-      --accent-soft: rgba(209, 87, 52, 0.12);
-      --win: #2f8c59;
-      --lose: #b2472d;
-      --shadow: 0 16px 40px rgba(88, 55, 34, 0.1);
-      --radius: 24px;
+      color-scheme: light;
+      --bg: #f3f5ff;
+      --bg-secondary: #eef7ff;
+      --surface: rgba(255, 255, 255, 0.68);
+      --surface-strong: rgba(255, 255, 255, 0.9);
+      --surface-soft: rgba(255, 255, 255, 0.54);
+      --text: #161b34;
+      --muted: #5d6481;
+      --line: rgba(58, 70, 110, 0.14);
+      --shadow: 0 24px 70px rgba(39, 52, 96, 0.16);
+      --hero-shadow: 0 30px 90px rgba(42, 73, 148, 0.2);
+      --accent: #6b6ef9;
+      --accent-strong: #544df6;
+      --accent-soft: rgba(107, 110, 249, 0.16);
+      --secondary: #12bcd4;
+      --secondary-soft: rgba(18, 188, 212, 0.18);
+      --odd: #f66ca4;
+      --odd-soft: rgba(246, 108, 164, 0.18);
+      --even: #12bcd4;
+      --even-soft: rgba(18, 188, 212, 0.18);
+      --success: #1eb980;
+      --success-soft: rgba(30, 185, 128, 0.18);
+      --danger: #ef5b72;
+      --danger-soft: rgba(239, 91, 114, 0.18);
+      --warning: #f3a73d;
+      --warning-soft: rgba(243, 167, 61, 0.18);
+      --radius-xl: 30px;
+      --radius-lg: 24px;
+      --radius-md: 18px;
+      --radius-sm: 14px;
+      --easing: cubic-bezier(0.2, 0.8, 0.2, 1);
+      --duration: 220ms;
+      --font-display: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      --font-body: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #09111f;
+      --bg-secondary: #111c33;
+      --surface: rgba(14, 22, 42, 0.72);
+      --surface-strong: rgba(17, 27, 51, 0.92);
+      --surface-soft: rgba(12, 19, 36, 0.68);
+      --text: #edf3ff;
+      --muted: #95a3c8;
+      --line: rgba(171, 187, 236, 0.16);
+      --shadow: 0 28px 90px rgba(2, 6, 16, 0.5);
+      --hero-shadow: 0 30px 90px rgba(0, 0, 0, 0.38);
+      --accent-soft: rgba(107, 110, 249, 0.26);
+      --secondary-soft: rgba(18, 188, 212, 0.22);
+      --odd-soft: rgba(246, 108, 164, 0.24);
+      --even-soft: rgba(18, 188, 212, 0.24);
+      --success-soft: rgba(30, 185, 128, 0.22);
+      --danger-soft: rgba(239, 91, 114, 0.24);
+      --warning-soft: rgba(243, 167, 61, 0.24);
     }
 
     * {
@@ -29,193 +71,460 @@
       display: none !important;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       margin: 0;
       min-height: 100vh;
-      padding: 24px;
-      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      overflow-x: hidden;
+      font-family: var(--font-body);
       color: var(--text);
       background:
-        radial-gradient(circle at top left, rgba(209, 87, 52, 0.14), transparent 28%),
-        linear-gradient(180deg, #faf6ef 0%, #f0e7d9 100%);
+        radial-gradient(circle at top left, rgba(107, 110, 249, 0.2), transparent 32%),
+        radial-gradient(circle at top right, rgba(18, 188, 212, 0.17), transparent 26%),
+        radial-gradient(circle at 50% 110%, rgba(246, 108, 164, 0.18), transparent 28%),
+        linear-gradient(160deg, var(--bg) 0%, var(--bg-secondary) 100%);
+      padding: 24px;
+      transition: background 400ms ease, color 240ms ease;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: auto;
+      width: 380px;
+      height: 380px;
+      border-radius: 50%;
+      filter: blur(70px);
+      opacity: 0.3;
+      pointer-events: none;
+      z-index: 0;
+      animation: floatBlob 16s ease-in-out infinite;
+    }
+
+    body::before {
+      top: -110px;
+      left: -90px;
+      background: rgba(107, 110, 249, 0.42);
+    }
+
+    body::after {
+      right: -120px;
+      bottom: -120px;
+      background: rgba(18, 188, 212, 0.34);
+      animation-delay: -6s;
     }
 
     .app {
-      width: min(1100px, 100%);
+      position: relative;
+      z-index: 1;
+      width: min(1180px, 100%);
       margin: 0 auto;
       display: grid;
-      gap: 20px;
+      gap: 24px;
+      animation: fadeSlideIn 700ms var(--easing);
     }
 
     .hero,
     .panel {
-      background: rgba(255, 250, 243, 0.92);
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-xl);
       border: 1px solid var(--line);
-      border-radius: var(--radius);
+      background: var(--surface);
       box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .hero::before,
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.16), transparent 40%);
+      pointer-events: none;
     }
 
     .hero {
-      padding: 28px;
+      padding: 30px;
+      box-shadow: var(--hero-shadow);
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.18), transparent 55%),
+        linear-gradient(160deg, var(--surface-strong), var(--surface-soft));
+    }
+
+    .hero-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent-strong);
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
     }
 
     .hero h1 {
-      margin: 0 0 10px;
-      font-size: clamp(2.2rem, 4vw, 3.6rem);
-      line-height: 0.96;
+      margin: 16px 0 10px;
+      font-family: var(--font-display);
+      font-size: clamp(2.6rem, 5vw, 4.9rem);
+      line-height: 0.92;
       letter-spacing: -0.04em;
     }
 
     .hero p {
       margin: 0;
-      max-width: 64ch;
+      max-width: 62ch;
       color: var(--muted);
       line-height: 1.7;
+      font-size: 1.04rem;
+    }
+
+    .tagline {
+      margin-top: 14px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
     }
 
     .hero-meta {
-      margin-top: 20px;
+      margin-top: 24px;
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .pill-row,
+    .action-row,
+    .hero-stats {
+      display: flex;
+      flex-wrap: wrap;
       gap: 12px;
       align-items: center;
     }
 
-    .pill-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
+    .pill,
+    .mini-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface-strong);
+      font-weight: 700;
+      color: var(--text);
     }
 
     .pill {
-      padding: 10px 14px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: var(--panel-soft);
-      font-weight: 700;
+      padding: 12px 16px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    }
+
+    .mini-pill {
+      padding: 8px 12px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .turn-pill {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .turn-pill::after {
+      content: "";
+      position: absolute;
+      inset: -20%;
+      background: radial-gradient(circle, rgba(107, 110, 249, 0.22), transparent 45%);
+      animation: pulseGlow 2.8s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .theme-toggle {
+      min-width: 54px;
+      justify-content: center;
     }
 
     .layout {
       display: grid;
-      grid-template-columns: 1.2fr 0.9fr;
-      gap: 20px;
+      grid-template-columns: 1.32fr 0.92fr;
+      gap: 24px;
+      align-items: start;
     }
 
     .panel {
       padding: 24px;
     }
 
+    .main-panel {
+      display: grid;
+      gap: 22px;
+    }
+
     .scoreboard {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
-      margin-bottom: 20px;
+      gap: 18px;
     }
 
     .player-card {
-      padding: 20px;
-      border-radius: 20px;
-      border: 1px solid var(--line);
-      background: var(--panel-soft);
+      position: relative;
+      overflow: hidden;
       display: grid;
-      gap: 12px;
+      gap: 14px;
+      padding: 20px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, var(--surface-strong), rgba(255, 255, 255, 0.42));
+      transition:
+        transform var(--duration) var(--easing),
+        border-color var(--duration) ease,
+        box-shadow var(--duration) ease,
+        background var(--duration) ease;
+    }
+
+    body[data-theme="dark"] .player-card {
+      background: linear-gradient(180deg, rgba(17, 27, 51, 0.95), rgba(17, 27, 51, 0.74));
+    }
+
+    .player-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -40% -40% auto;
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.15), transparent 62%);
+      pointer-events: none;
     }
 
     .player-card.active {
-      border-color: rgba(209, 87, 52, 0.35);
-      box-shadow: 0 12px 28px rgba(209, 87, 52, 0.12);
+      transform: translateY(-4px) scale(1.01);
+      border-color: rgba(107, 110, 249, 0.42);
+      box-shadow: 0 18px 40px rgba(107, 110, 249, 0.18);
     }
 
-    .player-head {
+    .player-card.active.holder {
+      box-shadow: 0 18px 44px rgba(107, 110, 249, 0.22);
+    }
+
+    .player-card.active.guesser {
+      box-shadow: 0 18px 44px rgba(18, 188, 212, 0.22);
+      border-color: rgba(18, 188, 212, 0.38);
+    }
+
+    .player-card.success-flash {
+      animation: successFlash 760ms ease;
+    }
+
+    .player-card.error-flash {
+      animation: errorFlash 660ms ease;
+    }
+
+    .player-label {
       display: flex;
+      align-items: center;
       justify-content: space-between;
       gap: 12px;
-      align-items: center;
     }
 
-    .player-head h2 {
+    .player-heading {
+      display: grid;
+      gap: 6px;
+    }
+
+    .player-heading h2 {
       margin: 0;
-      font-size: 1.1rem;
+      font-size: 1.18rem;
+      letter-spacing: -0.02em;
+    }
+
+    .player-subtitle {
+      color: var(--muted);
+      font-size: 0.9rem;
     }
 
     .role-tag {
-      padding: 7px 10px;
+      padding: 8px 12px;
       border-radius: 999px;
-      background: var(--accent-soft);
-      color: var(--accent-dark);
       font-size: 0.78rem;
       font-weight: 800;
-      text-transform: uppercase;
       letter-spacing: 0.05em;
+      text-transform: uppercase;
+      background: var(--accent-soft);
+      color: var(--accent-strong);
     }
 
-    .count {
-      font-size: clamp(2.3rem, 4vw, 3.3rem);
+    .player-card.guesser .role-tag {
+      background: var(--secondary-soft);
+      color: var(--secondary);
+    }
+
+    .score-shell {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .score-number {
+      font-family: var(--font-display);
+      font-size: clamp(2.8rem, 4vw, 3.8rem);
+      line-height: 0.9;
+      letter-spacing: -0.06em;
       font-weight: 900;
-      line-height: 1;
-      letter-spacing: -0.05em;
+      transition: color 260ms ease, transform 260ms ease;
+    }
+
+    .score-number.changed {
+      animation: popScore 620ms var(--easing);
+    }
+
+    .score-label {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .delta-chip {
+      min-width: 54px;
+      text-align: center;
+      padding: 10px 12px;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      font-weight: 800;
+      background: rgba(255, 255, 255, 0.55);
+      border: 1px solid var(--line);
+      color: var(--muted);
+    }
+
+    .delta-chip.positive {
+      background: var(--success-soft);
+      color: var(--success);
+    }
+
+    .delta-chip.negative {
+      background: var(--danger-soft);
+      color: var(--danger);
     }
 
     .marble-track {
       display: grid;
       grid-template-columns: repeat(10, 1fr);
-      gap: 8px;
+      gap: 10px;
     }
 
     .marble {
       aspect-ratio: 1;
       border-radius: 50%;
-      opacity: 0.14;
-      background: linear-gradient(145deg, #ffd6b4 0%, #d15734 100%);
-      box-shadow: inset -3px -3px 8px rgba(0, 0, 0, 0.14), inset 3px 3px 8px rgba(255, 255, 255, 0.34);
+      transform: scale(0.82);
+      opacity: 0.12;
+      background: linear-gradient(145deg, #ffffff 0%, #a9b2ff 24%, #726bfb 54%, #2ac1d9 100%);
+      box-shadow:
+        inset -5px -7px 12px rgba(11, 20, 45, 0.28),
+        inset 4px 4px 10px rgba(255, 255, 255, 0.52),
+        0 6px 18px rgba(70, 89, 168, 0.18);
+      transition: opacity 260ms ease, transform 260ms ease, filter 260ms ease;
     }
 
     .marble.filled {
       opacity: 1;
+      transform: scale(1);
+    }
+
+    .marble-track.transferring .marble.filled {
+      animation: pulseMarble 560ms ease;
     }
 
     .controls {
       display: grid;
-      gap: 16px;
+      gap: 18px;
     }
 
-    .section-card,
+    .status-card,
+    .control-group,
     .result-card,
-    .game-over-card {
-      padding: 18px;
-      border-radius: 20px;
+    .game-over {
+      position: relative;
+      overflow: hidden;
+      padding: 20px;
+      border-radius: var(--radius-lg);
       border: 1px solid var(--line);
-      background: var(--panel-soft);
-      display: grid;
-      gap: 10px;
+      background: linear-gradient(180deg, var(--surface-strong), rgba(255, 255, 255, 0.48));
     }
 
-    .section-card h3,
-    .result-card h3,
+    body[data-theme="dark"] .status-card,
+    body[data-theme="dark"] .control-group,
+    body[data-theme="dark"] .result-card,
+    body[data-theme="dark"] .game-over,
+    body[data-theme="dark"] .history-item {
+      background: linear-gradient(180deg, rgba(17, 27, 51, 0.95), rgba(17, 27, 51, 0.78));
+    }
+
+    .status-card::after,
+    .control-group::after,
+    .result-card::after,
+    .game-over::after,
+    .history-item::after {
+      content: "";
+      position: absolute;
+      inset: auto -20% -65% auto;
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(107, 110, 249, 0.14), transparent 60%);
+      pointer-events: none;
+    }
+
+    .section-title,
+    .status-card h3,
     .history-panel h3,
-    .game-over-card h3 {
-      margin: 0;
-      font-size: 0.95rem;
-      color: var(--muted);
+    .result-card h3,
+    .game-over h3 {
+      margin: 0 0 8px;
+      font-size: 0.92rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
+      color: var(--muted);
     }
 
-    .section-card p,
+    .status-card p,
     .result-card p,
     .history-item p,
-    .game-over-card p,
+    .empty-state,
     .supporting-copy {
       margin: 0;
       color: var(--muted);
-      line-height: 1.6;
+      line-height: 1.65;
     }
 
-    .control-label {
-      font-size: 1.05rem;
+    .control-group label {
+      display: block;
+      margin-bottom: 2px;
+      font-size: 1.06rem;
       font-weight: 800;
-      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+
+    .microcopy {
+      font-size: 0.92rem;
+      color: var(--muted);
+      font-weight: 600;
     }
 
     .control-row {
@@ -225,80 +534,203 @@
       align-items: center;
     }
 
+    .input-shell {
+      position: relative;
+      flex: 1 1 180px;
+    }
+
     input[type="number"] {
-      width: 150px;
-      padding: 12px 14px;
-      border-radius: 14px;
-      border: 1px solid rgba(42, 34, 28, 0.18);
-      background: #fff;
-      font: inherit;
+      width: 100%;
+      padding: 16px 16px 16px 20px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.86);
       color: var(--text);
+      font: inherit;
+      font-size: 1.02rem;
+      font-weight: 700;
+      transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
+    }
+
+    body[data-theme="dark"] input[type="number"] {
+      background: rgba(8, 14, 28, 0.72);
+    }
+
+    input[type="number"]:focus {
+      outline: none;
+      border-color: rgba(107, 110, 249, 0.42);
+      box-shadow: 0 0 0 5px rgba(107, 110, 249, 0.14);
+      transform: translateY(-1px);
     }
 
     .guess-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
     }
 
     button {
+      position: relative;
+      overflow: hidden;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
       border: 0;
-      border-radius: 14px;
-      padding: 12px 18px;
+      border-radius: 16px;
+      padding: 14px 18px;
       font: inherit;
       font-weight: 800;
+      letter-spacing: -0.01em;
       cursor: pointer;
+      color: #fff;
+      transform: translateZ(0);
+      transition:
+        transform 180ms var(--easing),
+        box-shadow 180ms ease,
+        opacity 180ms ease,
+        filter 180ms ease;
     }
 
-    .primary-button {
-      background: var(--accent);
-      color: #fffaf3;
+    button::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), transparent 40%);
+      opacity: 0;
+      transition: opacity 180ms ease;
     }
 
-    .secondary-button {
-      background: rgba(42, 34, 28, 0.08);
-      color: var(--text);
+    button:hover:not(:disabled) {
+      transform: translateY(-2px) scale(1.01);
+      box-shadow: 0 16px 30px rgba(59, 74, 130, 0.2);
+    }
+
+    button:hover:not(:disabled)::after {
+      opacity: 1;
+    }
+
+    button:active:not(:disabled) {
+      transform: translateY(1px) scale(0.985);
     }
 
     button:disabled {
-      opacity: 0.55;
+      opacity: 0.48;
       cursor: not-allowed;
+      box-shadow: none;
+      filter: grayscale(0.15);
     }
 
-    .error {
-      min-height: 1.4em;
-      color: var(--lose);
-      font-weight: 800;
+    .primary-button {
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+    }
+
+    .secondary-button {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.62);
+      border: 1px solid var(--line);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    }
+
+    body[data-theme="dark"] .secondary-button {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .odd-button {
+      background: linear-gradient(135deg, #ff79b0, #f44f92);
+    }
+
+    .even-button {
+      background: linear-gradient(135deg, #2bcbe1, #12b0ca);
+    }
+
+    .loading::before {
+      content: "";
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.26);
+      border-top-color: rgba(255, 255, 255, 0.96);
+      animation: spin 800ms linear infinite;
+    }
+
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 255, 255, 0.34);
+      animation: ripple 650ms ease-out forwards;
+      pointer-events: none;
+    }
+
+    .result-card {
+      gap: 12px;
+      transition: transform 280ms ease, box-shadow 280ms ease, border-color 280ms ease;
+    }
+
+    .result-card.success {
+      border-color: rgba(30, 185, 128, 0.34);
+      box-shadow: 0 20px 40px rgba(30, 185, 128, 0.12);
+    }
+
+    .result-card.loss {
+      border-color: rgba(239, 91, 114, 0.28);
+      box-shadow: 0 20px 40px rgba(239, 91, 114, 0.12);
+      animation: shakeCard 520ms ease;
+    }
+
+    .result-card.flash-in {
+      animation: resultIn 620ms var(--easing);
     }
 
     .result-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
-      font-size: 0.95rem;
+      font-size: 0.96rem;
     }
 
-    .stat {
-      padding: 12px;
+    .stat-cell {
+      padding: 12px 14px;
       border-radius: 16px;
+      background: rgba(255, 255, 255, 0.4);
       border: 1px solid var(--line);
-      background: rgba(255, 255, 255, 0.54);
     }
 
-    .stat strong {
+    body[data-theme="dark"] .stat-cell {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .stat-cell strong {
       display: block;
       margin-bottom: 4px;
       color: var(--text);
     }
 
-    .result-card.success {
-      border-color: rgba(47, 140, 89, 0.24);
-      background: rgba(47, 140, 89, 0.08);
+    .result-banner {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-weight: 800;
     }
 
-    .result-card.loss {
-      border-color: rgba(178, 71, 45, 0.2);
-      background: rgba(178, 71, 45, 0.08);
+    .result-banner.success {
+      background: var(--success-soft);
+      color: var(--success);
+    }
+
+    .result-banner.loss {
+      background: var(--danger-soft);
+      color: var(--danger);
+    }
+
+    .error {
+      min-height: 1.4em;
+      color: var(--danger);
+      font-weight: 800;
     }
 
     .history-panel {
@@ -307,21 +739,40 @@
       height: 100%;
     }
 
+    .history-panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
     .history-list {
       display: grid;
-      gap: 12px;
-      max-height: 760px;
+      gap: 14px;
+      max-height: 840px;
       overflow: auto;
       padding-right: 4px;
+      scrollbar-width: thin;
     }
 
     .history-item {
-      padding: 16px;
-      border-radius: 18px;
-      border: 1px solid var(--line);
-      background: var(--panel-soft);
+      position: relative;
+      overflow: hidden;
       display: grid;
-      gap: 8px;
+      gap: 10px;
+      padding: 18px;
+      border-radius: 22px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, var(--surface-strong), rgba(255, 255, 255, 0.46));
+      animation: logIn 520ms var(--easing);
+    }
+
+    .history-item.success {
+      border-color: rgba(30, 185, 128, 0.24);
+    }
+
+    .history-item.loss {
+      border-color: rgba(239, 91, 114, 0.22);
     }
 
     .history-item header {
@@ -331,38 +782,135 @@
       align-items: center;
     }
 
+    .history-item strong {
+      font-size: 0.98rem;
+    }
+
     .history-item span {
       color: var(--muted);
       font-size: 0.88rem;
     }
 
+    .history-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .history-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      font-size: 0.82rem;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.44);
+    }
+
+    body[data-theme="dark"] .history-tag {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
     .history-outcome {
       font-weight: 800;
-      color: var(--win);
+    }
+
+    .history-outcome.success {
+      color: var(--success);
     }
 
     .history-outcome.loss {
-      color: var(--lose);
+      color: var(--danger);
+    }
+
+    .game-over {
+      display: grid;
+      gap: 14px;
+      border-color: rgba(243, 167, 61, 0.26);
+      background:
+        radial-gradient(circle at top right, rgba(243, 167, 61, 0.16), transparent 34%),
+        linear-gradient(180deg, var(--surface-strong), rgba(255, 255, 255, 0.46));
+    }
+
+    body[data-theme="dark"] .game-over {
+      background:
+        radial-gradient(circle at top right, rgba(243, 167, 61, 0.18), transparent 34%),
+        linear-gradient(180deg, rgba(17, 27, 51, 0.95), rgba(17, 27, 51, 0.78));
     }
 
     .winner-title {
       margin: 0;
-      font-size: 1.8rem;
-      line-height: 1.05;
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      font-family: var(--font-display);
       letter-spacing: -0.04em;
     }
 
-    @media (max-width: 900px) {
-      .layout {
-        grid-template-columns: 1fr;
-      }
+    .winner-celebration {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
 
-      .scoreboard {
+    .winner-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: var(--warning-soft);
+      color: var(--warning);
+      font-weight: 800;
+    }
+
+    .play-again-button {
+      width: fit-content;
+    }
+
+    .marble-flight-layer,
+    .confetti-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 20;
+      overflow: hidden;
+    }
+
+    .flying-marble {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #ffffff, #827cff 55%, #2ac1d9);
+      box-shadow:
+        inset -3px -4px 8px rgba(0, 0, 0, 0.24),
+        inset 2px 2px 5px rgba(255, 255, 255, 0.5),
+        0 8px 22px rgba(107, 110, 249, 0.36);
+      animation: marbleFlight 700ms var(--easing) forwards;
+    }
+
+    .confetti-piece {
+      position: fixed;
+      top: -16px;
+      width: 10px;
+      height: 18px;
+      border-radius: 4px;
+      opacity: 0.9;
+      animation: confettiFall linear forwards;
+    }
+
+    @media (max-width: 980px) {
+      .layout {
         grid-template-columns: 1fr;
       }
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 720px) {
       body {
         padding: 14px;
       }
@@ -370,6 +918,25 @@
       .hero,
       .panel {
         padding: 18px;
+        border-radius: 24px;
+      }
+
+      .hero-top,
+      .hero-meta,
+      .history-panel-head,
+      .score-shell,
+      .player-label {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .scoreboard {
+        grid-template-columns: 1fr;
+      }
+
+      .guess-buttons,
+      .result-grid {
+        grid-template-columns: 1fr;
       }
 
       .control-row {
@@ -377,59 +944,249 @@
         align-items: stretch;
       }
 
-      input[type="number"] {
+      .action-row {
         width: 100%;
       }
 
-      .result-grid {
-        grid-template-columns: 1fr;
+      .action-row button {
+        flex: 1 1 auto;
+      }
+
+      .marble-track {
+        gap: 8px;
+      }
+    }
+
+    @keyframes fadeSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes floatBlob {
+      0%, 100% {
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+      50% {
+        transform: translate3d(12px, 24px, 0) scale(1.08);
+      }
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% {
+        opacity: 0.2;
+        transform: scale(0.85);
+      }
+      50% {
+        opacity: 0.5;
+        transform: scale(1.08);
+      }
+    }
+
+    @keyframes pulseMarble {
+      0%,
+      100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.14);
+      }
+    }
+
+    @keyframes popScore {
+      0% {
+        transform: scale(1);
+      }
+      36% {
+        transform: scale(1.14);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    @keyframes successFlash {
+      0% {
+        box-shadow: 0 0 0 rgba(30, 185, 128, 0);
+      }
+      45% {
+        box-shadow: 0 18px 42px rgba(30, 185, 128, 0.28);
+      }
+      100% {
+        box-shadow: none;
+      }
+    }
+
+    @keyframes errorFlash {
+      0% {
+        transform: translateX(0);
+      }
+      22% {
+        transform: translateX(-6px);
+      }
+      46% {
+        transform: translateX(6px);
+      }
+      70% {
+        transform: translateX(-3px);
+      }
+      100% {
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes ripple {
+      from {
+        width: 0;
+        height: 0;
+        opacity: 0.7;
+      }
+      to {
+        width: 240px;
+        height: 240px;
+        opacity: 0;
+      }
+    }
+
+    @keyframes resultIn {
+      from {
+        opacity: 0;
+        transform: translateY(14px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes shakeCard {
+      0%, 100% {
+        transform: translateX(0);
+      }
+      20% {
+        transform: translateX(-8px);
+      }
+      40% {
+        transform: translateX(8px);
+      }
+      60% {
+        transform: translateX(-5px);
+      }
+      80% {
+        transform: translateX(5px);
+      }
+    }
+
+    @keyframes logIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes marbleFlight {
+      from {
+        opacity: 0.15;
+        transform: translate(var(--start-x), var(--start-y)) scale(0.6);
+      }
+      10% {
+        opacity: 1;
+      }
+      to {
+        opacity: 0.08;
+        transform: translate(var(--end-x), var(--end-y)) scale(1.1);
+      }
+    }
+
+    @keyframes confettiFall {
+      from {
+        transform: translate3d(0, -10vh, 0) rotate(0deg);
+      }
+      to {
+        transform: translate3d(var(--drift, 0px), 110vh, 0) rotate(720deg);
       }
     }
   </style>
 </head>
-<body>
+<body data-theme="light">
+  <div class="marble-flight-layer" id="marbleFlightLayer" aria-hidden="true"></div>
+  <div class="confetti-layer" id="confettiLayer" aria-hidden="true"></div>
+
   <div class="app">
     <section class="hero">
-      <h1>Marble Match</h1>
-      <p>
-        A 2-player marble game inspired by the odd-or-even showdown. One player hides marbles, the other guesses,
-        and all 20 marbles stay in play until one player claims every last one.
-      </p>
+      <div class="hero-top">
+        <div>
+          <span class="eyebrow">🎲 Marble Match</span>
+          <h1>Outguess. Outplay. Own all 20 marbles.</h1>
+          <p>
+            A polished 2-player marble duel inspired by the odd-or-even showdown. One player hides marbles, the other
+            calls the parity, and every round swings the balance.
+          </p>
+          <p class="tagline">Can you outsmart your opponent and take all 20 marbles?</p>
+        </div>
+        <div class="action-row">
+          <button class="secondary-button theme-toggle" id="themeToggleButton" type="button" aria-label="Toggle dark mode">🌙</button>
+          <button class="secondary-button" id="restartButton" type="button">↻ Restart</button>
+        </div>
+      </div>
+
       <div class="hero-meta">
         <div class="pill-row">
-          <div class="pill" id="turnBadge">Current turn: Player 1 is holding</div>
+          <div class="pill turn-pill" id="turnBadge">Make your move 👀</div>
           <div class="pill" id="roundBadge">Round 1</div>
         </div>
-        <button class="secondary-button" id="restartButton" type="button">Restart Game</button>
+        <div class="hero-stats">
+          <div class="mini-pill">🟠 Total marbles: 20</div>
+          <div class="mini-pill">🔥 Big risk... big reward</div>
+        </div>
       </div>
     </section>
 
     <div class="layout">
-      <section class="panel">
+      <section class="panel main-panel">
         <div class="scoreboard" id="scoreboard"></div>
 
         <div class="controls">
-          <section class="section-card">
+          <section class="status-card">
             <h3>Turn Status</h3>
             <p id="statusText"></p>
           </section>
 
-          <section class="section-card">
-            <h3>Holder Move</h3>
-            <div class="control-label" id="holderLabel">Holder chooses how many marbles to hide</div>
+          <section class="control-group">
+            <h3 class="section-title">Holder Move</h3>
+            <label for="hiddenMarblesInput" id="holderLabel">Holder chooses how many marbles to hide</label>
+            <p class="microcopy">Keep it sneaky. Pick a legal amount and lock it in. 🎯</p>
             <div class="control-row">
-              <input id="hiddenMarblesInput" type="number" min="1" step="1" inputmode="numeric" />
-              <button class="primary-button" id="lockChoiceButton" type="button">Lock Hidden Marbles</button>
+              <div class="input-shell">
+                <input id="hiddenMarblesInput" type="number" min="1" step="1" inputmode="numeric" />
+              </div>
+              <button class="primary-button" id="lockChoiceButton" type="button">🔒 Lock Hidden Marbles</button>
             </div>
             <p id="holderHelp" class="supporting-copy"></p>
           </section>
 
-          <section class="section-card">
-            <h3>Guesser Move</h3>
-            <div class="control-label">Pick Odd or Even</div>
+          <section class="control-group">
+            <h3 class="section-title">Guesser Move</h3>
+            <label>Pick odd or even</label>
+            <p class="microcopy">Trust your read and commit. This is where the pressure hits. 👀</p>
             <div class="guess-buttons">
-              <button class="primary-button" id="guessOddButton" type="button">Odd</button>
-              <button class="primary-button" id="guessEvenButton" type="button">Even</button>
+              <button class="odd-button" id="guessOddButton" type="button">🔥 Odd</button>
+              <button class="even-button" id="guessEvenButton" type="button">💧 Even</button>
             </div>
             <p id="guesserHelp" class="supporting-copy"></p>
           </section>
@@ -438,29 +1195,40 @@
 
           <section id="roundResult" class="result-card" hidden>
             <h3>Last Round</h3>
+            <div class="result-banner" id="resultBanner"></div>
             <div class="result-grid">
-              <div class="stat"><strong>Hidden marbles</strong><span id="resultHidden"></span></div>
-              <div class="stat"><strong>Guess</strong><span id="resultGuess"></span></div>
-              <div class="stat"><strong>Outcome</strong><span id="resultOutcome"></span></div>
-              <div class="stat"><strong>Marble move</strong><span id="resultTransfer"></span></div>
-              <div class="stat"><strong>Player 1 total</strong><span id="resultPlayer1"></span></div>
-              <div class="stat"><strong>Player 2 total</strong><span id="resultPlayer2"></span></div>
+              <div class="stat-cell"><strong>Hidden marbles</strong><span id="resultHidden"></span></div>
+              <div class="stat-cell"><strong>Guess</strong><span id="resultGuess"></span></div>
+              <div class="stat-cell"><strong>Outcome</strong><span id="resultOutcome"></span></div>
+              <div class="stat-cell"><strong>Marble move</strong><span id="resultTransfer"></span></div>
+              <div class="stat-cell"><strong>Player 1 total</strong><span id="resultPlayer1"></span></div>
+              <div class="stat-cell"><strong>Player 2 total</strong><span id="resultPlayer2"></span></div>
             </div>
             <p id="resultSummary"></p>
           </section>
 
-          <section id="gameOverCard" class="game-over-card" hidden>
+          <section id="gameOverCard" class="game-over" hidden>
+            <div class="winner-celebration">
+              <div class="winner-badge">🎉 Winner Locked In</div>
+            </div>
             <h3>Game Over</h3>
-            <h2 class="winner-title" id="gameOverTitle"></h2>
+            <p class="winner-title" id="gameOverTitle"></p>
             <p id="gameOverText"></p>
+            <button class="primary-button play-again-button" id="playAgainButton" type="button">Play Again ✨</button>
           </section>
         </div>
       </section>
 
       <aside class="panel history-panel">
-        <h3>Game Log</h3>
+        <div class="history-panel-head">
+          <div>
+            <h3>Game Log</h3>
+            <p class="supporting-copy">Every read, bluff, and swing in momentum.</p>
+          </div>
+          <div class="mini-pill">📜 Live history</div>
+        </div>
         <div id="historyList" class="history-list" aria-live="polite">
-          <p class="supporting-copy">No rounds played yet. The first result will appear here.</p>
+          <p class="empty-state">No rounds played yet. The first result card will slide in here.</p>
         </div>
       </aside>
     </div>
@@ -473,6 +1241,12 @@
       ODD: "Odd",
       EVEN: "Even"
     };
+
+    const THEME_STORAGE_KEY = "marble-match-theme";
+    let isProcessingGuess = false;
+    let lastAnimatedRound = null;
+    let previousCounts = [STARTING_MARBLES, STARTING_MARBLES];
+    let guessRequestId = 0;
 
     function createInitialState() {
       return {
@@ -569,7 +1343,7 @@
       if (payer.marbles < hiddenMarbles) {
         return {
           ok: false,
-          message: `Illegal transfer: Player ${payer.id} does not have enough marbles.`
+          message: `Illegal transfer: Player ${payer.id} does not have ${hiddenMarbles} marbles to pay.`
         };
       }
 
@@ -577,12 +1351,12 @@
         ok: true,
         actualParity,
         guessCorrect,
-        transferred: hiddenMarbles,
-        giverId: payer.id,
+        payerId: payer.id,
         receiverId: receiver.id,
+        transferred: hiddenMarbles,
         summaryText: guessCorrect
           ? `Player ${guesser.id} guessed correctly, so Player ${holder.id} gives ${hiddenMarbles} marbles to Player ${guesser.id}.`
-          : `Player ${guesser.id} guessed wrong, so Player ${guesser.id} gives ${hiddenMarbles} marbles to Player ${holder.id}.`
+          : `Uh oh... that didn't go as planned 😬 Player ${guesser.id} guessed wrong, so Player ${guesser.id} gives ${hiddenMarbles} marbles to Player ${holder.id}.`
       };
     }
 
@@ -631,13 +1405,13 @@
         actualParity: transfer.actualParity,
         guessCorrect: transfer.guessCorrect,
         transferred: transfer.transferred,
-        giverId: transfer.giverId,
-        receiverId: transfer.receiverId,
-        summaryText: transfer.summaryText,
         marbleCounts: updatedPlayers.map((player) => ({
           id: player.id,
           marbles: player.marbles
-        }))
+        })),
+        receiverId: transfer.receiverId,
+        giverId: transfer.payerId,
+        summaryText: transfer.summaryText
       };
 
       return {
@@ -656,19 +1430,20 @@
     }
 
     const elements = {
+      body: document.body,
       scoreboard: document.getElementById("scoreboard"),
       turnBadge: document.getElementById("turnBadge"),
       roundBadge: document.getElementById("roundBadge"),
       statusText: document.getElementById("statusText"),
       hiddenMarblesInput: document.getElementById("hiddenMarblesInput"),
       lockChoiceButton: document.getElementById("lockChoiceButton"),
-      holderLabel: document.getElementById("holderLabel"),
       holderHelp: document.getElementById("holderHelp"),
       guesserHelp: document.getElementById("guesserHelp"),
       guessOddButton: document.getElementById("guessOddButton"),
       guessEvenButton: document.getElementById("guessEvenButton"),
       errorText: document.getElementById("errorText"),
       roundResult: document.getElementById("roundResult"),
+      resultBanner: document.getElementById("resultBanner"),
       resultHidden: document.getElementById("resultHidden"),
       resultGuess: document.getElementById("resultGuess"),
       resultOutcome: document.getElementById("resultOutcome"),
@@ -680,7 +1455,12 @@
       gameOverTitle: document.getElementById("gameOverTitle"),
       gameOverText: document.getElementById("gameOverText"),
       historyList: document.getElementById("historyList"),
-      restartButton: document.getElementById("restartButton")
+      restartButton: document.getElementById("restartButton"),
+      playAgainButton: document.getElementById("playAgainButton"),
+      holderLabel: document.getElementById("holderLabel"),
+      themeToggleButton: document.getElementById("themeToggleButton"),
+      marbleFlightLayer: document.getElementById("marbleFlightLayer"),
+      confettiLayer: document.getElementById("confettiLayer")
     };
 
     let gameState = createInitialState();
@@ -689,31 +1469,133 @@
       elements.errorText.textContent = message || "";
     }
 
+    function formatTurnText(state) {
+      if (state.winnerId !== null) {
+        return `🎉 Player ${state.winnerId} wins with all ${TOTAL_MARBLES} marbles.`;
+      }
+
+      const holder = getHolder(state);
+      const guesser = getGuesser(state);
+
+      if (state.hiddenMarbles !== null) {
+        return `Player ${holder.id} locked in the marbles. Player ${guesser.id}, make your call.`;
+      }
+
+      return `Make your move 👀 Player ${holder.id} is holding. Player ${guesser.id} is reading the bluff.`;
+    }
+
+    function getPlayerDelta(playerId, state) {
+      if (!state.lastResult) {
+        return 0;
+      }
+
+      if (state.lastResult.receiverId === playerId) {
+        return state.lastResult.transferred;
+      }
+
+      if (state.lastResult.giverId === playerId) {
+        return -state.lastResult.transferred;
+      }
+
+      return 0;
+    }
+
     function renderScoreboard(state) {
       const holder = getHolder(state);
+      const guesser = getGuesser(state);
 
       elements.scoreboard.innerHTML = state.players
         .map((player) => {
+          const role = state.winnerId !== null
+            ? (player.id === state.winnerId ? "Winner" : "Opponent")
+            : (player.id === holder.id ? "Holder" : "Guesser");
+          const cardClass = state.winnerId !== null
+            ? ""
+            : (player.id === holder.id ? "active holder" : "active guesser");
+          const delta = getPlayerDelta(player.id, state);
+          const deltaClass = delta > 0 ? "positive" : delta < 0 ? "negative" : "";
+          const deltaText = delta > 0 ? `+${delta}` : delta < 0 ? `${delta}` : "±0";
           const marbles = Array.from({ length: TOTAL_MARBLES }, (_, index) => {
             const marbleClass = index < player.marbles ? "marble filled" : "marble";
             return `<span class="${marbleClass}" aria-hidden="true"></span>`;
           }).join("");
-          const role = state.winnerId !== null
-            ? (player.id === state.winnerId ? "Winner" : "Opponent")
-            : (player.id === holder.id ? "Holder" : "Guesser");
+          const subtitle = player.id === holder.id
+            ? "Secret keeper this round"
+            : "Reading the parity";
 
           return `
-            <article class="player-card ${player.id === holder.id && state.winnerId === null ? "active" : ""}">
-              <div class="player-head">
-                <h2>Player ${player.id}</h2>
+            <article class="player-card ${cardClass}" data-player-id="${player.id}">
+              <div class="player-label">
+                <div class="player-heading">
+                  <h2>Player ${player.id}</h2>
+                  <span class="player-subtitle">${state.winnerId !== null && player.id === state.winnerId ? "All marbles collected" : subtitle}</span>
+                </div>
                 <span class="role-tag">${role}</span>
               </div>
-              <div class="count">${player.marbles}</div>
-              <div class="marble-track">${marbles}</div>
+              <div class="score-shell">
+                <div>
+                  <div class="score-number" data-player-score="${player.id}">${player.marbles}</div>
+                  <div class="score-label">marbles in hand</div>
+                </div>
+                <div class="delta-chip ${deltaClass}" aria-label="Round change">${deltaText}</div>
+              </div>
+              <div class="marble-track" data-player-track="${player.id}">${marbles}</div>
             </article>
           `;
         })
         .join("");
+
+      animateScoreNumbers(state);
+      pulseTracks();
+    }
+
+    function animateScoreNumbers(state) {
+      const scoreNodes = elements.scoreboard.querySelectorAll("[data-player-score]");
+
+      scoreNodes.forEach((node) => {
+        const playerId = Number(node.dataset.playerScore);
+        const target = state.players.find((player) => player.id === playerId).marbles;
+        const previous = previousCounts[playerId - 1] ?? target;
+        const start = previous;
+        const duration = 480;
+        const startTime = performance.now();
+
+        if (start !== target) {
+          node.classList.add("changed");
+          setTimeout(() => node.classList.remove("changed"), 640);
+        }
+
+        function tick(now) {
+          const progress = Math.min((now - startTime) / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          const current = Math.round(start + (target - start) * eased);
+          node.textContent = current;
+
+          if (progress < 1) {
+            requestAnimationFrame(tick);
+          } else {
+            node.textContent = target;
+          }
+        }
+
+        requestAnimationFrame(tick);
+      });
+
+      previousCounts = state.players.map((player) => player.marbles);
+    }
+
+    function pulseTracks() {
+      const tracks = elements.scoreboard.querySelectorAll("[data-player-track]");
+      tracks.forEach((track) => {
+        track.classList.add("transferring");
+        setTimeout(() => track.classList.remove("transferring"), 620);
+      });
+    }
+
+    function getResultBanner(result) {
+      return result.guessCorrect
+        ? { text: "✅ Correct guess", className: "success" }
+        : { text: "❌ Wrong guess", className: "loss" };
     }
 
     function renderLastResult(state) {
@@ -726,22 +1608,34 @@
 
       const player1 = result.marbleCounts.find((player) => player.id === 1);
       const player2 = result.marbleCounts.find((player) => player.id === 2);
+      const banner = getResultBanner(result);
 
       elements.roundResult.hidden = false;
-      elements.roundResult.classList.toggle("success", result.guessCorrect);
-      elements.roundResult.classList.toggle("loss", !result.guessCorrect);
+      elements.roundResult.classList.remove("success", "loss", "flash-in");
+      elements.roundResult.classList.add(result.guessCorrect ? "success" : "loss");
+      void elements.roundResult.offsetWidth;
+      elements.roundResult.classList.add("flash-in");
+
+      elements.resultBanner.className = `result-banner ${banner.className}`;
+      elements.resultBanner.textContent = banner.text;
       elements.resultHidden.textContent = `${result.hiddenMarbles}`;
-      elements.resultGuess.textContent = result.guess;
-      elements.resultOutcome.textContent = result.guessCorrect ? "Correct guess" : "Wrong guess";
-      elements.resultTransfer.textContent = `Player ${result.giverId} -> Player ${result.receiverId} (${result.transferred})`;
+      elements.resultGuess.textContent = `${result.guess}`;
+      elements.resultOutcome.textContent = result.guessCorrect ? "The guesser nailed it 🎯" : "The bluff worked 😈";
+      elements.resultTransfer.textContent = `Player ${result.giverId} → Player ${result.receiverId} (${result.transferred})`;
       elements.resultPlayer1.textContent = `${player1.marbles}`;
       elements.resultPlayer2.textContent = `${player2.marbles}`;
       elements.resultSummary.textContent = result.summaryText;
     }
 
+    function getHistoryOutcome(entry) {
+      return entry.guessCorrect
+        ? { icon: "✅", label: "Correct guess", className: "success" }
+        : { icon: "❌", label: "Wrong guess", className: "loss" };
+    }
+
     function renderHistory(state) {
       if (state.history.length === 0) {
-        elements.historyList.innerHTML = '<p class="supporting-copy">No rounds played yet. The first result will appear here.</p>';
+        elements.historyList.innerHTML = '<p class="empty-state">No rounds played yet. The first result card will slide in here.</p>';
         return;
       }
 
@@ -749,16 +1643,21 @@
         .map((entry) => {
           const player1 = entry.marbleCounts.find((player) => player.id === 1);
           const player2 = entry.marbleCounts.find((player) => player.id === 2);
+          const outcome = getHistoryOutcome(entry);
 
           return `
-            <article class="history-item">
+            <article class="history-item ${outcome.className}">
               <header>
                 <strong>Round ${entry.round}</strong>
                 <span>Holder: Player ${entry.holderId} • Guesser: Player ${entry.guesserId}</span>
               </header>
-              <p>Hidden marbles: <strong>${entry.hiddenMarbles}</strong> • Guess: <strong>${entry.guess}</strong></p>
-              <p class="history-outcome ${entry.guessCorrect ? "" : "loss"}">
-                ${entry.guessCorrect ? "Guess correct" : "Guess wrong"} • Player ${entry.giverId} paid ${entry.transferred} marbles to Player ${entry.receiverId}
+              <div class="history-tags">
+                <span class="history-tag">🎯 Hidden: ${entry.hiddenMarbles}</span>
+                <span class="history-tag">${entry.guess === GUESSES.ODD ? "🔥" : "💧"} Guess: ${entry.guess}</span>
+                <span class="history-tag">🟠 Move: ${entry.transferred}</span>
+              </div>
+              <p class="history-outcome ${outcome.className}">
+                ${outcome.icon} ${outcome.label} • Player ${entry.giverId} paid ${entry.transferred} marbles to Player ${entry.receiverId}
               </p>
               <p>Counts after round: Player 1 = ${player1.marbles}, Player 2 = ${player2.marbles}</p>
             </article>
@@ -774,39 +1673,38 @@
       const gameOver = state.winnerId !== null;
       const hiddenLocked = state.hiddenMarbles !== null;
 
-      elements.turnBadge.textContent = gameOver
-        ? `Player ${state.winnerId} wins`
-        : `Current turn: Player ${holder.id} is holding`;
+      elements.turnBadge.textContent = formatTurnText(state);
       elements.roundBadge.textContent = `Round ${state.round}`;
       elements.statusText.textContent = gameOver
-        ? `Player ${state.winnerId} collected all ${TOTAL_MARBLES} marbles.`
+        ? `Player ${state.winnerId} collected all ${TOTAL_MARBLES} marbles. Fire up another match when you're ready.`
         : hiddenLocked
-          ? `Player ${holder.id} locked in the hidden marbles. Player ${guesser.id}, guess Odd or Even.`
-          : `Player ${holder.id} must choose a number between 1 and ${maximumLegalWager}.`;
+          ? `Big read moment 💥 Player ${holder.id} is set. Player ${guesser.id}, choose Odd or Even.`
+          : `Player ${holder.id} is up. Make it count and choose a number between 1 and ${maximumLegalWager}.`;
 
       elements.holderLabel.textContent = `Player ${holder.id} chooses how many marbles to hide`;
       elements.holderHelp.textContent = gameOver
         ? "The match is complete."
-        : `Valid range: 1 to ${maximumLegalWager}. Player ${holder.id} has ${holder.marbles}, Player ${guesser.id} has ${guesser.marbles}.`;
+        : `Legal range: 1 to ${maximumLegalWager}. Player ${holder.id} has ${holder.marbles}, Player ${guesser.id} has ${guesser.marbles}.`;
       elements.guesserHelp.textContent = gameOver
-        ? "Restart to begin a new game."
+        ? "Restart to begin a fresh showdown."
         : hiddenLocked
-          ? `Player ${guesser.id} can now make the guess.`
+          ? `Player ${guesser.id}, trust your instinct.`
           : `Waiting for Player ${holder.id} to lock in the hidden marbles.`;
 
       elements.hiddenMarblesInput.min = "1";
       elements.hiddenMarblesInput.max = String(maximumLegalWager);
-      elements.hiddenMarblesInput.disabled = gameOver || hiddenLocked;
+      elements.hiddenMarblesInput.disabled = gameOver || hiddenLocked || isProcessingGuess;
       elements.hiddenMarblesInput.value = hiddenLocked ? String(state.hiddenMarbles) : "";
-      elements.lockChoiceButton.disabled = gameOver || hiddenLocked;
-      elements.guessOddButton.disabled = gameOver || !hiddenLocked;
-      elements.guessEvenButton.disabled = gameOver || !hiddenLocked;
+      elements.lockChoiceButton.disabled = gameOver || hiddenLocked || isProcessingGuess;
+      elements.guessOddButton.disabled = gameOver || !hiddenLocked || isProcessingGuess;
+      elements.guessEvenButton.disabled = gameOver || !hiddenLocked || isProcessingGuess;
 
       elements.gameOverCard.hidden = !gameOver;
       if (gameOver) {
         const loser = state.players.find((player) => player.id !== state.winnerId);
-        elements.gameOverTitle.textContent = `Player ${state.winnerId} takes all 20 marbles`;
-        elements.gameOverText.textContent = `Player ${loser.id} is out with 0 marbles.`;
+        elements.gameOverTitle.textContent = `Player ${state.winnerId} takes the crown 👑`;
+        elements.gameOverText.textContent =
+          `Player ${state.winnerId} finishes with all ${TOTAL_MARBLES} marbles. Player ${loser.id} is out with 0.`;
       }
     }
 
@@ -815,6 +1713,131 @@
       renderControls(gameState);
       renderLastResult(gameState);
       renderHistory(gameState);
+      applyFeedbackState(gameState);
+    }
+
+    function applyFeedbackState(state) {
+      const cards = elements.scoreboard.querySelectorAll(".player-card");
+      cards.forEach((card) => card.classList.remove("success-flash", "error-flash"));
+
+      if (!state.lastResult) {
+        return;
+      }
+
+      const receiverCard = elements.scoreboard.querySelector(`[data-player-id="${state.lastResult.receiverId}"]`);
+      const giverCard = elements.scoreboard.querySelector(`[data-player-id="${state.lastResult.giverId}"]`);
+
+      if (receiverCard) {
+        receiverCard.classList.add("success-flash");
+      }
+
+      if (giverCard) {
+        giverCard.classList.add(state.lastResult.guessCorrect ? "error-flash" : "error-flash");
+      }
+    }
+
+    function createRipple(event) {
+      const button = event.currentTarget;
+      const ripple = document.createElement("span");
+      ripple.className = "ripple";
+      const rect = button.getBoundingClientRect();
+      ripple.style.left = `${event.clientX - rect.left}px`;
+      ripple.style.top = `${event.clientY - rect.top}px`;
+      button.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 650);
+    }
+
+    function animateMarbleTransfer(result) {
+      const giverCard = elements.scoreboard.querySelector(`[data-player-id="${result.giverId}"]`);
+      const receiverCard = elements.scoreboard.querySelector(`[data-player-id="${result.receiverId}"]`);
+
+      if (!giverCard || !receiverCard) {
+        return;
+      }
+
+      const giverRect = giverCard.getBoundingClientRect();
+      const receiverRect = receiverCard.getBoundingClientRect();
+      const startX = giverRect.left + giverRect.width / 2;
+      const startY = giverRect.top + giverRect.height / 2;
+      const endX = receiverRect.left + receiverRect.width / 2;
+      const endY = receiverRect.top + receiverRect.height / 2;
+      const count = Math.min(result.transferred, 8);
+
+      for (let index = 0; index < count; index += 1) {
+        const marble = document.createElement("span");
+        marble.className = "flying-marble";
+        marble.style.setProperty("--start-x", `${startX}px`);
+        marble.style.setProperty("--start-y", `${startY}px`);
+        marble.style.setProperty("--end-x", `${endX + (index - count / 2) * 10}px`);
+        marble.style.setProperty("--end-y", `${endY + ((index % 2) * 10) - 6}px`);
+        marble.style.animationDelay = `${index * 55}ms`;
+        elements.marbleFlightLayer.appendChild(marble);
+        setTimeout(() => marble.remove(), 900 + index * 55);
+      }
+    }
+
+    function launchConfetti() {
+      const colors = ["#6b6ef9", "#12bcd4", "#f66ca4", "#f3a73d", "#1eb980"];
+
+      for (let index = 0; index < 70; index += 1) {
+        const piece = document.createElement("span");
+        piece.className = "confetti-piece";
+        piece.style.left = `${Math.random() * 100}vw`;
+        piece.style.background = colors[index % colors.length];
+        piece.style.animationDuration = `${2.8 + Math.random() * 1.8}s`;
+        piece.style.animationDelay = `${Math.random() * 0.35}s`;
+        piece.style.setProperty("--drift", `${(Math.random() - 0.5) * 180}px`);
+        elements.confettiLayer.appendChild(piece);
+        setTimeout(() => piece.remove(), 4600);
+      }
+    }
+
+    function maybeCelebrateWinner(state) {
+      if (state.winnerId !== null && state.lastResult && state.lastResult.round !== lastAnimatedRound) {
+        launchConfetti();
+      }
+    }
+
+    function playClickSound() {
+      if (!window.AudioContext && !window.webkitAudioContext) {
+        return;
+      }
+
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      const audioContext = new AudioContextClass();
+      const oscillator = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+
+      oscillator.type = "triangle";
+      oscillator.frequency.value = 420;
+      gain.gain.value = 0.0001;
+      oscillator.connect(gain);
+      gain.connect(audioContext.destination);
+      oscillator.start();
+      gain.gain.exponentialRampToValueAtTime(0.03, audioContext.currentTime + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.12);
+      oscillator.stop(audioContext.currentTime + 0.13);
+    }
+
+    function applyTheme(theme) {
+      elements.body.dataset.theme = theme;
+      elements.themeToggleButton.textContent = theme === "dark" ? "☀️" : "🌙";
+      localStorage.setItem(THEME_STORAGE_KEY, theme);
+    }
+
+    function toggleTheme() {
+      applyTheme(elements.body.dataset.theme === "dark" ? "light" : "dark");
+    }
+
+    function initializeTheme() {
+      const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+      if (savedTheme === "dark" || savedTheme === "light") {
+        applyTheme(savedTheme);
+        return;
+      }
+
+      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      applyTheme(prefersDark ? "dark" : "light");
     }
 
     function handleLockChoice() {
@@ -830,36 +1853,89 @@
       render();
     }
 
-    function handleGuess(guess) {
-      const result = playRound(gameState, guess);
+    function beginGuessProcessing(button) {
+      isProcessingGuess = true;
+      guessRequestId += 1;
+      button.classList.add("loading");
+      button.disabled = true;
+      elements.guessOddButton.disabled = true;
+      elements.guessEvenButton.disabled = true;
+      elements.lockChoiceButton.disabled = true;
+      elements.hiddenMarblesInput.disabled = true;
+      return guessRequestId;
+    }
 
-      if (!result.ok) {
-        setError(result.message);
+    function endGuessProcessing(button) {
+      isProcessingGuess = false;
+      button.classList.remove("loading");
+    }
+
+    function handleGuess(guess, button) {
+      if (isProcessingGuess) {
         return;
       }
 
-      gameState = result.state;
-      setError("");
-      render();
+      const requestId = beginGuessProcessing(button);
+
+      setTimeout(() => {
+        if (requestId !== guessRequestId) {
+          endGuessProcessing(button);
+          return;
+        }
+
+        const result = playRound(gameState, guess);
+
+        if (!result.ok) {
+          endGuessProcessing(button);
+          setError(result.message);
+          render();
+          return;
+        }
+
+        const previousRound = gameState.lastResult ? gameState.lastResult.round : 0;
+        gameState = result.state;
+        endGuessProcessing(button);
+        setError("");
+        render();
+
+        if (gameState.lastResult && gameState.lastResult.round !== previousRound) {
+          animateMarbleTransfer(gameState.lastResult);
+          maybeCelebrateWinner(gameState);
+          lastAnimatedRound = gameState.lastResult.round;
+        }
+      }, 460);
     }
 
     function restartGame() {
+      guessRequestId += 1;
       gameState = createInitialState();
+      previousCounts = [STARTING_MARBLES, STARTING_MARBLES];
+      lastAnimatedRound = null;
+      isProcessingGuess = false;
       setError("");
       render();
       elements.hiddenMarblesInput.focus();
     }
 
+    [elements.lockChoiceButton, elements.guessOddButton, elements.guessEvenButton, elements.restartButton, elements.playAgainButton, elements.themeToggleButton]
+      .forEach((button) => {
+        button.addEventListener("click", playClickSound);
+        button.addEventListener("pointerdown", createRipple);
+      });
+
     elements.lockChoiceButton.addEventListener("click", handleLockChoice);
-    elements.guessOddButton.addEventListener("click", () => handleGuess(GUESSES.ODD));
-    elements.guessEvenButton.addEventListener("click", () => handleGuess(GUESSES.EVEN));
+    elements.guessOddButton.addEventListener("click", () => handleGuess(GUESSES.ODD, elements.guessOddButton));
+    elements.guessEvenButton.addEventListener("click", () => handleGuess(GUESSES.EVEN, elements.guessEvenButton));
     elements.restartButton.addEventListener("click", restartGame);
+    elements.playAgainButton.addEventListener("click", restartGame);
+    elements.themeToggleButton.addEventListener("click", toggleTheme);
     elements.hiddenMarblesInput.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
         handleLockChoice();
       }
     });
 
+    initializeTheme();
     render();
   </script>
 </body>
