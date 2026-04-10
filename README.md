@@ -48,7 +48,7 @@ Each round:
 python3 -m http.server 4173
 ```
 
-Open:
+Then open this local development URL:
 
 ```text
 http://localhost:4173
